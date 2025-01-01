@@ -59,12 +59,12 @@ __END__
 
 =head1 NAME
 
-pm_filter.pl - Filter for Perl module
+pm_simple_filter.pl - Filter for Perl module
 
 
 =head1 SYNOPSIS
 
-  pm_filter.pl < LIB_PM > BLIB_PM
+  pm_simple_filter.pl < LIB_PM > BLIB_PM
 
 =head1 DESCRIPTION
 
