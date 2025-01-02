@@ -5,8 +5,10 @@ my $Line;
 my $Version;
 my $Author = "Abdul al Hazred";
 
+my @Filtered;
+
 while (defined($Line = <>)) {
-  print($Line);
+  push(@Filtered, $Line);
   if ($Line =~ /^\s*
                 (?:use\s+version(?:\s+\d+\.\d+)?\s*;\s*)?
                 our\s+\$VERSION\s*=\s*
@@ -28,12 +30,12 @@ die("No version found") if !defined($Version);
 # We assume that there is a '__END__' line followed by a '=pod'.
 #
 while (defined($Line = <>)) {
-  print($Line);
+  push(@Filtered, $Line);;
   last if $Line =~ /^\s*__END__\s*$/;
 }
 die("No __END__ found") if !defined($Line);
 while (defined($Line = <>)) {
-    print($Line);
+    push(@Filtered, $Line);;
   last if $Line =~ /^=pod\s*$/;
 }
 die("No =pod found") if !defined($Line);
@@ -46,8 +48,9 @@ while (defined($Line = <>)) {
     $Line =~ s/#AUTHOR#/$Author/g;
     $Line =~ s/#VERSION#/$Version/g;
   }
-  print($Line);
+  push(@Filtered, $Line);;
 }
+print(@Filtered);
 
 
 
