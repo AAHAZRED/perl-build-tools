@@ -29,3 +29,23 @@ rmtree($DistVName);
 system("gzip -9f $DistVName.tar") == 0 or die;
 print("Created $DistVName.tar.gz");
 
+
+__END__
+
+
+=pod
+
+
+=head1 NAME
+
+mkdist.pl - EXPERIMENTAL - DO NOT USE
+
+
+=head1 SYNOPSIS
+
+
+=head1 DESCRIPTION
+
+
+
+=cut
