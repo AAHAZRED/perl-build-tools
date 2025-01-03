@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+use autodie;
 
 my $Line;
 my $Version;
@@ -7,7 +8,19 @@ my $Author = "Abdul al Hazred";
 
 my @Filtered;
 
-while (defined($Line = <>)) {
+my ($InHndl, $OutHndl);
+my ($InFile, $OutFile);
+
+if (@ARGV) {
+  die("Too many arguments") if @ARGV > 2;
+  ($InFile, $OutFile) = @ARGV;
+  $OutFile //= $InFile;
+  open($InHndl, '<', $InFile);
+} else {
+  ($InHndl, $OutHndl) = (*STDIN, *STDOUT);
+}
+
+while (defined($Line = <$InHndl>)) {
   push(@Filtered, $Line);
   if ($Line =~ /^\s*
                 (?:use\s+version(?:\s+\d+\.\d+)?\s*;\s*)?
@@ -29,12 +42,12 @@ die("No version found") if !defined($Version);
 #
 # We assume that there is a '__END__' line followed by a '=pod'.
 #
-while (defined($Line = <>)) {
+while (defined($Line = <$InHndl>)) {
   push(@Filtered, $Line);;
   last if $Line =~ /^\s*__END__\s*$/;
 }
 die("No __END__ found") if !defined($Line);
-while (defined($Line = <>)) {
+while (defined($Line = <$InHndl>)) {
     push(@Filtered, $Line);;
   last if $Line =~ /^=pod\s*$/;
 }
@@ -43,15 +56,19 @@ die("No =pod found") if !defined($Line);
 #
 # Now we are in the POD section and do our replacements!
 #
-while (defined($Line = <>)) {
+while (defined($Line = <$InHndl>)) {
   if ($Line =~ /^\S/) {
     $Line =~ s/#AUTHOR#/$Author/g;
     $Line =~ s/#VERSION#/$Version/g;
   }
-  push(@Filtered, $Line);;
+  push(@Filtered, $Line);
 }
-print(@Filtered);
-
+close($InHndl);
+if (defined($OutFile)) {
+  open($OutHndl, '>', $OutFile);
+}
+print $OutHndl (@Filtered);
+close($OutHndl);
 
 
 __END__
@@ -67,16 +84,20 @@ pm_simple_filter.pl - Filter for Perl module
 
 =head1 SYNOPSIS
 
-  pm_simple_filter.pl < LIB_PM > BLIB_PM
+  pm_simple_filter.pl [[INFILE] OUTFILE]
 
 =head1 DESCRIPTION
 
 To be autmatically called via C<PM_FILTER> during the uild process.
 
-Reads from C<STDIN> and writes to C<STDOUT>. Input must be code of a Perl
-module. It reads the VERSION (must be present!) and in the POD section, it
-replaces C<#VERSION#> with that version and C<#AUTHOR#> with the name of the
-author (hard coded in this script). It does not replace in verbatim lines.
+Input must be code of a Perl module. It reads the VERSION (must be present!)
+and in the POD section, it replaces C<#VERSION#> with that version and
+C<#AUTHOR#> with the name of the author (hard coded in this script). It does
+not replace in verbatim lines.
+
+The script reads from C<INFILE> and writes to C<OUTFILE>. If only C<INFILE> is
+specified, this file is changed. Without arguments, the script reads from
+C<STDIN> and writed to C<STDOUT>.
 
 The script assumes that the POD is located at the bottom of the file, after an
 C<__END__> followed by optional empty lines followed by a C<=pod>.
